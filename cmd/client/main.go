@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fx.New(
-		di.InjectShopApp(),
-		fx.Invoke(application.StartShop),
+		di.InjectClientApp(),
+		fx.Invoke(application.StartClient),
 	).Run()
 }

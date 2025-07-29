@@ -28,19 +28,27 @@ services:
       - zookeeper
     networks:
       - kafka-ntw
+    volumes:
+      - ./kafka-0-creds:/etc/kafka/secrets
     ports:
       - "9093:9093"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://${DOCKER_HOST_IP:-127.0.0.1}:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://0.0.0.0:9093,SSL://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://${DOCKER_HOST_IP:-127.0.0.1}:9093,SSL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SSL://0.0.0.0:9093
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka-0.keystore.pkcs12
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka-0_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka-0_sslkey_creds
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-0.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-0_truststore_creds
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
     healthcheck:
       test: kafka-topics --bootstrap-server kafka1:9092 --list
       interval: 30s
@@ -57,19 +65,27 @@ services:
       - zookeeper
     networks:
       - kafka-ntw
+    volumes:
+      - ./kafka-1-creds:/etc/kafka/secrets
     ports:
       - "9094:9094"
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://0.0.0.0:9094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://${DOCKER_HOST_IP:-127.0.0.1}:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://0.0.0.0:9094,SSL://0.0.0.0:9095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://${DOCKER_HOST_IP:-127.0.0.1}:9094,SSL://localhost:9095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,SSL:SSL
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+      KAFKA_SSL_KEYSTORE_FILENAME: kafka.kafka-1.keystore.pkcs12
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: kafka-1_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: kafka-1_sslkey_creds
+      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.kafka-1.truststore.jks
+      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: kafka-1_truststore_creds
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
     healthcheck:
       test: kafka-topics --bootstrap-server kafka2:9092 --list
       interval: 30s
@@ -227,6 +243,27 @@ services:
     command: [ "postgres", "-c", "wal_level=logical" ]
     volumes:
       - postgres_vol:/tmp/postgresql/data
+    networks:
+      - kafka-ntw
+
+
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
+    links:
+      - kafka-connect
+    networks:
+      - kafka-ntw
+
+  grafana:
+    build:
+      context: ./grafana
+    ports:
+      - 3000:3000
     networks:
       - kafka-ntw
 

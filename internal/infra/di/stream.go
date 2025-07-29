@@ -8,18 +8,16 @@ import (
 	"go.uber.org/fx"
 )
 
-func GetAppConstructors() []interface{} {
+func GetStreamAppConstructors() []interface{} {
 	return []interface{}{
 		logger.NewLogger,
 		config.NewConfig,
-
-		msg.NewSchema,
-		msg.NewEmitter,
+		msg.NewProcessor,
 	}
 }
 
-func InjectApp() fx.Option {
+func InjectStreamApp() fx.Option {
 	return fx.Provide(
-		GetAppConstructors()...,
+		GetStreamAppConstructors()...,
 	)
 }

@@ -9,18 +9,33 @@ import (
 )
 
 type Price struct {
-	Amount   int64  `json:"amount"`
+	Amount   int    `json:"amount"`
 	Currency string `json:"currency"`
 }
 
 type Stock struct {
-	Available int64 `json:"available"`
-	Reserved  int64 `json:"reserved"`
+	Available int `json:"available"`
+	Reserved  int `json:"reserved"`
 }
 
 type Image struct {
 	Url string `json:"url"`
 	Alt string `json:"alt"`
+}
+
+type Images []Image
+
+func generateNewImages() Images {
+	f := gofakeit.New(0)
+	result := make([]Image, 0)
+	for i := 0; i < f.Number(1, 10); i++ {
+		name := f.Zip()
+		result = append(result, Image{
+			"http://localhost/" + name,
+			name,
+		})
+	}
+	return result
 }
 
 type Specification struct {
@@ -40,7 +55,7 @@ type Product struct {
 	Stock          Stock         `json:"stock"`
 	Sku            string        `json:"sku"`
 	Tags           []string      `json:"tags"`
-	Images         []Image       `json:"images"`
+	Images         Images        `json:"images"`
 	Specifications Specification `json:"specifications"`
 	CreatedAt      string        `json:"created_at"`
 	UpdatedAt      string        `json:"updated_at"`
@@ -61,27 +76,24 @@ func GenerateNewProducts(ctx context.Context, cnt int, productOutCh chan<- *Prod
 				return
 			default:
 				p := &Product{
-					f.ProductSuffix(),
+					f.ProductISBN(&gofakeit.ISBNOptions{
+						Version: "13",
+					}),
 					f.ProductName(),
 					f.ProductDescription(),
 					Price{
-						int64(f.Number(1000, 10000)),
+						f.Number(1000, 10000),
 						"RUB",
 					},
 					f.ProductCategory(),
 					f.Name(),
 					Stock{
-						int64(f.Number(100, 10000)),
-						int64(f.Number(1, 1000)),
+						f.Number(100, 10000),
+						f.Number(1, 1000),
 					},
 					f.ProductSuffix(),
 					[]string{f.Name(), f.Name(), f.Name()},
-					[]Image{
-						{
-							"http://localhost",
-							"alt text",
-						},
-					},
+					generateNewImages(),
 					Specification{
 						f.ProductFeature(),
 						f.ProductDimension(),

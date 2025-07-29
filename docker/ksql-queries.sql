@@ -1,18 +1,31 @@
-CREATE OR REPLACE STREAM messages_stream (id INT, user_id INT, recipient_id INT, message VARCHAR, created_at TIMESTAMP)
-WITH (VALUE_FORMAT='JSON', KAFKA_TOPIC='messages', PARTITIONS=3);
+CREATE OR REPLACE STREAM analytic_products_filtered_table_stream (
+    product_id VARCHAR KEY,
+    name VARCHAR,
+    description VARCHAR,
+    price STRUCT<amount INT, currency VARCHAR>,
+    category VARCHAR,
+    brand VARCHAR,
+    stock STRUCT<available INT, reserved INT>,
+    sku VARCHAR,
+    tags ARRAY<STRING>,
+    images ARRAY<STRUCT<url VARCHAR, alt VARCHAR>>,
+    specifications STRUCT<weight VARCHAR, dimensions VARCHAR, battery_life VARCHAR, water_resistance VARCHAR>,
+    created_at VARCHAR,
+    updated_at VARCHAR,
+    index VARCHAR,
+    store_id VARCHAR
+)
+WITH (VALUE_FORMAT='JSON', KAFKA_TOPIC='analytic_products_filtered-table', PARTITIONS=2);
 
-CREATE OR REPLACE TABLE blocked_users_table (id INT PRIMARY KEY, recipient_id INT, block_user_id INT)
-WITH (VALUE_FORMAT='JSON', KAFKA_TOPIC='postgres.public.blocked_users', PARTITIONS=3);
+CREATE OR REPLACE STREAM analytic_products_find_stream (
+    id VARCHAR KEY,
+    user_id VARCHAR,
+    find VARCHAR
+)
+WITH (VALUE_FORMAT='JSON', KAFKA_TOPIC='analytic_products_find', PARTITIONS=2);
 
-CREATE OR REPLACE TABLE blocked_users_flatten_table
-WITH (PARTITIONS=3) AS
-SELECT recipient_id, COLLECT_LIST(block_user_id) as block_user_list
-FROM blocked_users_table
-GROUP BY recipient_id;
-
-CREATE OR REPLACE STREAM messages_filtered_block_users_stream
-WITH (VALUE_FORMAT='JSON', PARTITIONS=3) AS
-SELECT m.id as "id", m.user_id as "user_id", m.recipient_id as "recipient_id", m.message as "message", m.created_at as "created_at"
-FROM messages_stream m
-LEFT JOIN blocked_users_flatten_table buf ON (m.recipient_id = buf.recipient_id)
-WHERE NOT ARRAY_CONTAINS(buf.block_user_list, m.user_id);
+CREATE OR REPLACE STREAM personal_recom
+WITH (PARTITIONS=2, REPLICAS=1) AS
+SELECT *
+FROM analytic_products_filtered_table_stream ap
+LEFT JOIN analytic_products_find_stream af WITHIN 1 HOUR ON (ap.name = af.find);

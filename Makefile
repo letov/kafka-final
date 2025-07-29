@@ -15,11 +15,14 @@ ksqldb-cli:
 init: create-topics create-connectors ksqldb-migrations
 
 create-topics: delete-topics
-	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --create --topic messages --bootstrap-server localhost:9093 --partitions 3 --replication-factor 2
+	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --create --topic shop_products --bootstrap-server kafka1:9092 --partitions 2 --replication-factor 1
+	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --create --topic analytic_products_filtered --bootstrap-server kafka1:9092 --partitions 2 --replication-factor 1
+	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --create --topic analytic_products_find --bootstrap-server kafka1:9092 --partitions 2 --replication-factor 1
 
 delete-topics:
-	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --if-exists --delete --topic postgres.public.blocked_users --bootstrap-server localhost:9093
-	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --if-exists --delete --topic messages --bootstrap-server localhost:9093
+	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --if-exists --delete --topic analytic_products_find --bootstrap-server kafka1:9092
+	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --if-exists --delete --topic analytic_products_filtered --bootstrap-server kafka1:9092
+	$(docker_compose_bin) exec -it kafka1 ../../usr/bin/kafka-topics --if-exists --delete --topic shop_products --bootstrap-server kafka1:9092
 
 create-connectors: delete-connectors
 	curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @docker/postgres-connector.json
