@@ -77,7 +77,7 @@ func GenerateNewProducts(ctx context.Context, cnt int, productOutCh chan<- *Prod
 					f.ProductSuffix(),
 					[]string{f.Name(), f.Name(), f.Name()},
 					[]Image{
-						Image{
+						{
 							"http://localhost",
 							"alt text",
 						},
