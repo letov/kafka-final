@@ -3,7 +3,7 @@ package msg
 import (
 	"encoding/json"
 	"errors"
-	"kafka-final/domain"
+	domain2 "kafka-final/internal/domain"
 )
 
 type ProductCodec struct {
@@ -12,7 +12,7 @@ type ProductCodec struct {
 }
 
 func (mc ProductCodec) Encode(value any) ([]byte, error) {
-	if _, isMsg := value.(*domain.Product); !isMsg {
+	if _, isMsg := value.(*domain2.Product); !isMsg {
 		return nil, errors.New("value is not Product")
 	}
 	return json.Marshal(value)
@@ -20,7 +20,7 @@ func (mc ProductCodec) Encode(value any) ([]byte, error) {
 
 func (mc ProductCodec) Decode(data []byte) (any, error) {
 	var (
-		p   domain.Product
+		p   domain2.Product
 		err error
 	)
 	err = json.Unmarshal(data, &p)
@@ -40,7 +40,7 @@ type FindCodec struct {
 }
 
 func (mc FindCodec) Encode(value any) ([]byte, error) {
-	if _, isMsg := value.(*domain.Find); !isMsg {
+	if _, isMsg := value.(*domain2.Find); !isMsg {
 		return nil, errors.New("value is not Find")
 	}
 	return json.Marshal(value)
@@ -48,7 +48,7 @@ func (mc FindCodec) Encode(value any) ([]byte, error) {
 
 func (mc FindCodec) Decode(data []byte) (any, error) {
 	var (
-		p   domain.Find
+		p   domain2.Find
 		err error
 	)
 	err = json.Unmarshal(data, &p)

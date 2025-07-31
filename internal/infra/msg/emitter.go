@@ -2,7 +2,7 @@ package msg
 
 import (
 	"context"
-	"kafka-final/domain"
+	domain2 "kafka-final/internal/domain"
 	"kafka-final/internal/infra/config"
 
 	"github.com/lovoo/goka"
@@ -15,7 +15,7 @@ type Emitter struct {
 	log *zap.SugaredLogger
 }
 
-func (pe Emitter) EmitProduct(ctx context.Context, productCh chan *domain.Product) {
+func (pe Emitter) EmitProduct(ctx context.Context, productCh chan *domain2.Product) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -31,7 +31,7 @@ func (pe Emitter) EmitProduct(ctx context.Context, productCh chan *domain.Produc
 	}
 }
 
-func (pe Emitter) EmitFind(ctx context.Context, findCh chan *domain.Find) {
+func (pe Emitter) EmitFind(ctx context.Context, findCh chan *domain2.Find) {
 	for {
 		select {
 		case <-ctx.Done():

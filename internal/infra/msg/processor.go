@@ -2,7 +2,7 @@ package msg
 
 import (
 	"context"
-	"kafka-final/domain"
+	"kafka-final/internal/domain"
 	"kafka-final/internal/infra/config"
 	"log"
 	"regexp"

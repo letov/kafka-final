@@ -3,7 +3,7 @@ package msg
 import (
 	"context"
 	"errors"
-	"kafka-final/domain"
+	"kafka-final/internal/domain"
 	"kafka-final/internal/infra/config"
 
 	"strings"
