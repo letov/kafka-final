@@ -23,9 +23,9 @@
     ```bash
     make create-topics
     ```
-    **shop_products** - топик, куда магазины выгружают все товары
-    **analytic_products_filtered** - топик, где пакетно отфильтрованы товары по названию
-    **analytic_products_find** - топик, куда попадают промты поиска от пользователей
+    **shop_products** - топик, куда магазины выгружают все товары<br>
+    **analytic_products_filtered** - топик, где пакетно отфильтрованы товары по названию<br>
+    **analytic_products_find** - топик, куда попадают промты поиска от пользователей<br>
 
 4. Созадания DEBEZIUM коннекторов для репликации топиков в postgres db
     ```bash
